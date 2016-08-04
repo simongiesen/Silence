@@ -80,7 +80,7 @@
     <string name="ConversationItem_unable_to_open_media">Can\'t find an app able to open this media.</string>
     <string name="ConversationItem_from_s">from %s</string>
     <string name="ConversationItem_to_s">to %s</string>
-    <string name="ConversationItem_xmpp_address">XMPP address. Update Silence to enable this feature.</string>
+    <string name="ConversationItem_xmpp_address">XMPP address</string>
 
     <!-- ConversationActivity -->
     <string name="ConversationActivity_initiate_secure_session_question">Initiate secure session?</string>
@@ -114,12 +114,14 @@
     <string name="ConversationActivity_transport_insecure_mms">Insecure MMS</string>
     <string name="ConversationActivity_transport_secure_sms">Secure SMS</string>
     <string name="ConversationActivity_transport_secure_mms">Secure MMS</string>
+    <string name="ConversationActivity_transport_secure_xmpp">XMPP</string>
     <string name="ConversationActivity_install_smssecure">Let\'s chat securely: %s</string>
     <string name="ConversationActivity_recipient_self">Secure sessions can only be established with other people.</string>
     <string name="ConversationActivity_mms_not_supported_title">MMS not supported</string>
     <string name="ConversationActivity_mms_not_supported_message">This message cannot be sent since your carrier doesn\'t support MMS.</string>
     <string name="ConversationActivity_specify_recipient">Please choose a contact</string>
     <string name="ConversationActivity_attachment_exceeds_size_limits">Attachment exceeds size limits.</string>
+    <string name="ConversationActivity_recipient_is_offline_xmpp_messages_may_be_delayed">Recipient is offline. XMPP messages may be delayed.</string>
 
     <!-- ConversationFragment -->
     <string name="ConversationFragment_message_details">Message details</string>
@@ -154,6 +156,7 @@
     <string name="ConversationFragment_pending">Pending...</string>
     <string name="ConversationFragment_mms">MMS</string>
     <string name="ConversationFragment_sms">SMS</string>
+    <string name="ConversationFragment_xmpp">XMPP</string>
     <string name="ConversationFragment_deleting">Deleting...</string>
     <string name="ConversationFragment_deleting_messages">Deleting messages...</string>
 
@@ -198,6 +201,8 @@
 
     <!-- ShareActivity -->
     <string name="ShareActivity_share_with">Share with</string>
+    <string name="ShareActivity_add_xmpp_address">Add XMPP address</string>
+    <string name="ShareActivity_xmpp_address_added">XMPP address added</string>
 
     <!-- IntroScreenActivity -->
     <string name="IntroScreenActivity_welcome_to_silence">Welcome to Silence!</string>
@@ -208,6 +213,9 @@
     <string name="IntroScreenActivity_talk_to_everyone_description">Silence can use unencrypted messages to chat with non-Silence users.</string>
     <string name="IntroScreenActivity_smssecure_is_now_silence">SMSSecure is now Silence.</string>
     <string name="IntroScreenActivity_your_messages_are_still_here">SMSSecure is now Silence. Your messages are still here and new features are coming.</string>
+    <string name="IntroScreenActivity_protect_your_metadata">Protect your metadata</string>
+    <string name="IntroScreenActivity_protect_your_metadata_description">You can optionally enable XMPP messages to protect your metadata.</string>
+    <string name="IntroScreenActivity_protect_your_metadata_link">Tap to configure XMPP messages</string>
 
     <!-- ExportFragment -->
     <string name="ExportFragment_export">Export</string>
@@ -421,6 +429,34 @@
     <string name="SingleRecipientNotificationBuilder_silence">Silence</string>
     <string name="SingleRecipientNotificationBuilder_new_message">New message</string>
 
+    <!-- XmppService -->
+    <string name="XmppService_connecting_to_xmpp_server">Connecting to XMPP server...</string>
+    <string name="XmppService_xmpp_connection_failed">XMPP connection failed</string>
+    <string name="XmppService_xmpp_features_in_silence_are_disabled">XMPP features in Silence are disabled.</string>
+
+    <!-- XmppEnterAddressDialog -->
+    <string name="XmppEnterAddressDialog_done">Done!</string>
+
+    <!-- XmppAddressDialog -->
+    <string name="XmppAddressDialog_share_xmpp_address">Share XMPP address</string>
+    <string name="XmppAddressDialog_silence_xmpp_address">Silence XMPP address</string>
+    <string name="XmppAddressDialog_xmpp_address_copied">XMPP address copied!</string>
+    <string name="XmppAddressDialog_share">Share</string>
+    <string name="XmppAddressDialog_here_is_my_silence_xmpp_address">Here is my Silence XMPP address: %1$s. Enter it into Silence to start a secure conversation.</string>
+
+    <!-- XmppRegisterActivity -->
+    <string name="XmppRegisterActivity__cannot_create_an_xmpp_account_please_try_again_later">Cannot create an XMPP account. Please try again later.</string>
+    <string name="XmppRegisterActivity__registered">Registered!</string>
+    <string name="XmppRegisterActivity__unregistered">Unregistered!</string>
+    <string name="XmppRegisterActivity__you_are_already_registered">You are already registered!</string>
+
+    <!-- xmpp_enter_address_dialog -->
+    <string name="xmpp_enter_address_dialog__xmpp_address">XMPP address</string>
+    <string name="xmpp_enter_address_dialog__use_this_form_to_enter_the_xmpp_address_of">Use this form to enter the XMPP address of %s.</string>
+
+    <!-- xmpp_address_dialog -->
+    <string name="xmpp_address_dialog__send_the_link_above_to_your_contacts_to_start_using_xmpp_messages_with_them">Send the link above to your contacts to start using XMPP messages with them.</string>
+
     <!-- change_passphrase_activity -->
     <string name="change_passphrase_activity__old_passphrase">Old passphrase</string>
     <string name="change_passphrase_activity__new_passphrase">New passphrase</string>
@@ -453,6 +489,7 @@
     <string name="conversation_activity__type_message_sms_insecure">Send unsecured SMS</string>
     <string name="conversation_activity__type_message_mms_secure">Send secure MMS</string>
     <string name="conversation_activity__type_message_mms_insecure">Send unsecured MMS</string>
+    <string name="conversation_activity__type_message_xmpp_secure">Send secure XMPP message</string>
     <string name="conversation_activity__from_sim_name">From %1$s</string>
     <string name="conversation_activity__send">Send</string>
     <string name="conversation_activity__remove">Remove</string>
@@ -465,6 +502,7 @@
     <string name="conversation_item__mms_downloading_description">Media message downloading</string>
     <string name="conversation_item__mms_image_description">Media message</string>
     <string name="conversation_item__secure_message_description">Secure message</string>
+    <string name="conversation_item__xmpp_message_description">XMPP message</string>
 
     <!-- conversation_item_sent -->
     <string name="conversation_item_sent__download">Download</string>
@@ -574,6 +612,8 @@
     <string name="AndroidManifest__message_details">Message details</string>
     <string name="AndroidManifest_archived_conversations">Archived conversations</string>
     <string name="AndroidManifest_configure_mms_settings">Configure MMS Settings</string>
+    <string name="AndroidManifest__register">Register</string>
+    <string name="AndroidManifest__use_a_custom_xmpp_server">Use a custom XMPP server</string>
 
     <!-- arrays.xml -->
     <string name="arrays__import_export">Import / export</string>
@@ -712,6 +752,20 @@
     <string name="preferences__roaming_auto_retrieve">Roaming auto-retrieve</string>
     <string name="preferences__automatically_retrieve_mms_when_roaming">Automatically retrieve MMS when roaming</string>
     <string name="preferences_chats__message_trimming">Message trimming</string>
+    <string name="preferences__xmpp">XMPP messages</string>
+    <string name="preferences__enable_xmpp_messages">Enable XMPP messages</string>
+    <string name="preferences__xmpp_status">XMPP status</string>
+    <string name="preferences__xmpp_status_registered_connected">Registered, connected.</string>
+    <string name="preferences__xmpp_status_registered_disconnected">Registered, disconnected.</string>
+    <string name="preferences__xmpp_status_unregistered">Unregistered.</string>
+    <string name="preferences__xmpp_unregistering_xmpp">Unregistering XMPP?</string>
+    <string name="preferences__xmpp_unregistering_from_xmpp_will_delete_the_account_on_the_server">Unregistering from XMPP will delete your account on the server and notify every contact with an XMPP session using SMS messages.</string>
+    <string name="preferences__xmpp_notify">Notify contacts</string>
+    <string name="preferences__xmpp_notify_summary">Send an SMS message with my XMPP address to every contact with a secure session.</string>
+    <string name="preferences__xmpp_notifying">Notifying</string>
+    <string name="preferences__xmpp_sending_messages_to_contacts">Sending messages to contacts</string>
+    <string name="preferences__force_xmpp_messages">Force XMPP messages</string>
+    <string name="preferences__enable_this_option_to_always_use_xmpp_transport_even_if_recipient_is_offline">Enable this option to always use XMPP transport even if recipient is offline.</string>
 
     <!-- **************************************** -->
     <!-- menus -->
@@ -775,7 +829,10 @@
     <!-- conversation_secure_verified -->
     <string name="conversation_secure_verified__menu_security">Security</string>
     <string name="conversation_secure_verified__menu_verify_identity">Verify identity</string>
+    <string name="conversation_secure_verified__menu_share_xmpp_address">Share XMPP address</string>
+    <string name="conversation_secure_verified__menu_share_xmpp_address_via_sms">Share XMPP address via SMS</string>
     <string name="conversation_secure_verified__menu_abort_secure_session">End secure session</string>
+    <string name="conversation_secure_verified__menu_enter_xmpp_address_manually">Enter XMPP address manually</string>
 
     <!-- conversation_muted -->
     <string name="conversation_muted__unmute">Unmute</string>
@@ -849,6 +906,21 @@
     <!-- transport_selection_list_item -->
     <string name="transport_selection_list_item__transport_icon">Transport icon</string>
 
+    <!-- register_xmpp_account -->
+    <string name="register_xmpp_account_description">You can enable XMPP messages in Silence to protect your metadata. Metadata (mostly to who you talk and when) is a sensitive information that cannot be hidden using SMS messages. XMPP messages use data so you need to be connected to the Internet to use this transport and receive messages.</string>
+    <string name="register_xmpp_account_warning">Remember: there is one metadata that you cannot hide. Your GSM carrier will always be able to locate your phone at any time.</string>
+    <string name="register_xmpp_account_choose">If you don\'t have an XMPP account, Silence will create one on a random trusted server. If you manage your own XMPP server, you can use it instead.</string>
+    <string name="register_xmpp_account_use_a_trusted_server">Use a trusted server</string>
+    <string name="register_xmpp_account_use_my_own_server">Use my own server</string>
+    <string name="register_xmpp_account_cancel">Cancel</string>
+    <string name="register_xmpp_account_registration">Registration</string>
+    <string name="register_xmpp_account_creating_an_xmpp_account">Creating an XMPP account...</string>
+    <string name="register_xmpp_account_hostname">Hostname</string>
+    <string name="register_xmpp_account_port">Port</string>
+    <string name="register_xmpp_account_connect">Connect</string>
+    <string name="register_xmpp_account_invalid_port">Invalid port.</string>
+    <string name="register_xmpp_account_cannot_register_on_this_server">Cannot register on this server.</string>
+    <string name="register_xmpp_account_it_is_highly_recommended_to_enable_stream_management">It is highly recommended to enable the Stream Management extension (XEP-0198) on your server. Stream Management allows Silence to resume connections. Without that, you may lost messages on unreliable connections.</string>
 
     <!-- EOF -->
 

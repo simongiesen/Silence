@@ -51,6 +51,7 @@ public class Recipient {
   private Uri          contactUri;
 
   @Nullable private MaterialColor color;
+  @Nullable private String        xmppJid;
 
   Recipient(long recipientId,
             @NonNull  String number,
@@ -61,12 +62,14 @@ public class Recipient {
     this.number       = number;
     this.contactPhoto = ContactPhotoFactory.getLoadingPhoto();
     this.color        = null;
+    this.xmppJid      = null;
 
     if (stale != null) {
       this.name         = stale.name;
       this.contactUri   = stale.contactUri;
       this.contactPhoto = stale.contactPhoto;
       this.color        = stale.color;
+      this.xmppJid      = stale.xmppJid;
     }
 
     future.addListener(new FutureTaskListener<RecipientDetails>() {
@@ -79,6 +82,7 @@ public class Recipient {
             Recipient.this.contactUri   = result.contactUri;
             Recipient.this.contactPhoto = result.avatar;
             Recipient.this.color        = result.color;
+            Recipient.this.xmppJid      = result.xmppJid;
           }
 
           notifyListeners();
@@ -99,6 +103,7 @@ public class Recipient {
     this.name         = details.name;
     this.contactPhoto = details.avatar;
     this.color        = details.color;
+    this.xmppJid      = details.xmppJid;
   }
 
   public synchronized @Nullable Uri getContactUri() {
@@ -118,6 +123,19 @@ public class Recipient {
   public void setColor(@NonNull MaterialColor color) {
     synchronized (this) {
       this.color = color;
+    }
+
+    notifyListeners();
+  }
+
+  public synchronized @Nullable String getXmppJid() {
+    return this.xmppJid;
+  }
+
+  public void setXmppJid(@Nullable String xmppJid) {
+    synchronized (this) {
+      if (xmppJid == null || xmppJid.equals("NULL")) xmppJid = null;
+      this.xmppJid = xmppJid;
     }
 
     notifyListeners();
@@ -153,7 +171,7 @@ public class Recipient {
 
   public static Recipient getUnknownRecipient() {
     return new Recipient(-1, new RecipientDetails("Unknown", "Unknown", null,
-                                                  ContactPhotoFactory.getDefaultContactPhoto(null), null));
+                                                  ContactPhotoFactory.getDefaultContactPhoto(null), null, null));
   }
 
   @Override

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/preferences__xmpp">
+        <org.smssecure.smssecure.components.SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_xmpp_enabled"
+            android:title="@string/preferences__enable_xmpp_messages" />
+
+        <Preference android:key="pref_xmpp_status"
+                    android:title="@string/preferences__xmpp_status"
+                    android:dependency="pref_xmpp_enabled" />
+
+        <org.smssecure.smssecure.components.SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="pref_xmpp_force"
+            android:title="@string/preferences__force_xmpp_messages"
+            android:summary="@string/preferences__enable_this_option_to_always_use_xmpp_transport_even_if_recipient_is_offline"
+            android:dependency="pref_xmpp_enabled" />
+
+        <Preference android:key="pref_xmpp_notify"
+                    android:title="@string/preferences__xmpp_notify"
+                    android:summary="@string/preferences__xmpp_notify_summary"
+                    android:dependency="pref_xmpp_enabled" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

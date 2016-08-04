@@ -146,30 +146,18 @@ public class CanonicalAddressDatabase {
   }
 
   public long getCanonicalAddressId(@NonNull String address) {
-    try {
-      long canonicalAddressId;
+    long canonicalAddressId;
 
-      if (isNumberAddress(address) && SilencePreferences.isPushRegistered(context)) {
-        String localNumber = SilencePreferences.getLocalNumber(context);
-
-        if (!ShortCodeUtil.isShortCode(localNumber, address)) {
-          address = PhoneNumberFormatter.formatNumber(address, localNumber);
-        }
-      }
-
-      if ((canonicalAddressId = getCanonicalAddressFromCache(address)) != -1) {
-        return canonicalAddressId;
-      }
-
-      canonicalAddressId = getCanonicalAddressIdFromDatabase(address);
-
-      idCache.put(canonicalAddressId, address);
-      addressCache.put(address, canonicalAddressId);
-
+    if ((canonicalAddressId = getCanonicalAddressFromCache(address)) != -1) {
       return canonicalAddressId;
-    } catch (InvalidNumberException e) {
-      throw new AssertionError(e);
     }
+
+    canonicalAddressId = getCanonicalAddressIdFromDatabase(address);
+
+    idCache.put(canonicalAddressId, address);
+    addressCache.put(address, canonicalAddressId);
+
+    return canonicalAddressId;
   }
 
   public @NonNull List<Long> getCanonicalAddressIds(@NonNull List<String> addresses) {
@@ -185,6 +173,28 @@ public class CanonicalAddressDatabase {
   private long getCanonicalAddressFromCache(String address) {
     Long cachedAddress = addressCache.get(address);
     return cachedAddress == null ? -1L : cachedAddress;
+  }
+
+  public List<String> getCanonicalNumbers() {
+    SQLiteDatabase db     = databaseHelper.getWritableDatabase();
+    Cursor         cursor = null;
+
+    try {
+      cursor = db.query(TABLE, null, null, null, null, null, null);
+
+      List<String> recipients = new LinkedList<>();
+
+      while (cursor != null && cursor.moveToNext()) {
+        long   canonicalId = cursor.getLong(cursor.getColumnIndexOrThrow(ID_COLUMN));
+        String address     = cursor.getString(cursor.getColumnIndexOrThrow(ADDRESS_COLUMN));
+        if (canonicalId > 1) recipients.add(address);
+      }
+
+      return recipients;
+    } finally {
+      if (cursor != null)
+        cursor.close();
+    }
   }
 
   private long getCanonicalAddressIdFromDatabase(@NonNull String address) {

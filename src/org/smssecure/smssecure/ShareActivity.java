@@ -30,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import org.smssecure.smssecure.crypto.MasterSecret;
 import org.smssecure.smssecure.mms.PartAuthority;
@@ -62,6 +63,7 @@ public class ShareActivity extends PassphraseRequiredActionBarActivity
   private Uri          resolvedExtra;
   private String       mimeType;
   private boolean      isPassingAlongMedia;
+  private String       xmppAddress;
 
   @Override
   protected void onPreCreate() {
@@ -79,6 +81,8 @@ public class ShareActivity extends PassphraseRequiredActionBarActivity
 
     initFragment(R.id.drawer_layout, new ShareFragment(), masterSecret);
     initializeMedia();
+    Uri xmppUri = getIntent().getData();
+    if (xmppUri != null) xmppAddress = xmppUri.getEncodedFragment();
   }
 
   @Override
@@ -93,7 +97,11 @@ public class ShareActivity extends PassphraseRequiredActionBarActivity
     super.onResume();
     dynamicTheme.onResume(this);
     dynamicLanguage.onResume(this);
-    getSupportActionBar().setTitle(R.string.ShareActivity_share_with);
+    if (xmppAddress != null && !xmppAddress.equals("")) {
+      getSupportActionBar().setTitle(R.string.ShareActivity_add_xmpp_address);
+    } else {
+      getSupportActionBar().setTitle(R.string.ShareActivity_share_with);
+    }
   }
 
   @Override
@@ -157,6 +165,11 @@ public class ShareActivity extends PassphraseRequiredActionBarActivity
   }
 
   private void createConversation(long threadId, Recipients recipients, int distributionType) {
+    if (xmppAddress != null && !xmppAddress.equals("")) {
+      recipients.getPrimaryRecipient().setXmppJid(xmppAddress);
+      Toast.makeText(getApplicationContext(), R.string.ShareActivity_xmpp_address_added, Toast.LENGTH_LONG).show();
+    }
+
     final Intent intent = getBaseShareIntent(ConversationActivity.class);
     intent.putExtra(ConversationActivity.RECIPIENTS_EXTRA, recipients.getIds());
     intent.putExtra(ConversationActivity.THREAD_ID_EXTRA, threadId);

@@ -1,7 +1,10 @@
 package org.smssecure.smssecure.crypto;
 
 import android.content.Context;
+import android.os.AsyncTask;
+import android.util.Log;
 
+import org.smssecure.smssecure.database.DatabaseFactory;
 import org.smssecure.smssecure.recipients.Recipient;
 import org.smssecure.smssecure.recipients.RecipientFactory;
 import org.smssecure.smssecure.recipients.RecipientFormattingException;
@@ -33,8 +36,11 @@ import org.whispersystems.libaxolotl.protocol.WhisperMessage;
 import org.whispersystems.libaxolotl.state.AxolotlStore;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class SmsCipher {
+
+  private static final String TAG = SmsCipher.class.getSimpleName();
 
   private final SmsTransportDetails transportDetails = new SmsTransportDetails();
 
@@ -53,13 +59,23 @@ public class SmsCipher {
       WhisperMessage whisperMessage = new WhisperMessage(decoded);
       SessionCipher  sessionCipher  = new SessionCipher(axolotlStore, new AxolotlAddress(message.getSender(), 1));
       byte[]         padded         = sessionCipher.decrypt(whisperMessage);
-      byte[]         plaintext      = transportDetails.getStrippedPaddingMessageBody(padded);
+      String         plaintext      = new String(transportDetails.getStrippedPaddingMessageBody(padded));
 
-      if (message.isEndSession() && "TERMINATE".equals(new String(plaintext))) {
+      if (message.isEndSession() && "TERMINATE".equals(plaintext)) {
         axolotlStore.deleteSession(new AxolotlAddress(message.getSender(), 1));
       }
 
-      return message.withMessageBody(new String(plaintext));
+      if (message.isXmppExchange() && message.getSender() != null) { // TODO: Jid validation
+        Log.w(TAG, "Proceeding XMPP exchange...");
+        Recipients recipients = RecipientFactory.getRecipientsFromString(context, message.getSender(), true);
+
+        if (recipients.getPrimaryRecipient() != null) {
+          recipients.getPrimaryRecipient().setXmppJid(plaintext);
+          DatabaseFactory.getRecipientPreferenceDatabase(context).setXmppJid(recipients, plaintext);
+        }
+      }
+
+      return message.withMessageBody(plaintext);
     } catch (IOException e) {
       throw new InvalidMessageException(e);
     }

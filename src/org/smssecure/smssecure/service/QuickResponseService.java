@@ -19,10 +19,13 @@ import org.smssecure.smssecure.recipients.Recipients;
 import org.smssecure.smssecure.sms.MessageSender;
 import org.smssecure.smssecure.sms.OutgoingTextMessage;
 import org.smssecure.smssecure.util.Rfc5724Uri;
+import org.smssecure.smssecure.util.ViewUtil;
 import org.whispersystems.libaxolotl.util.guava.Optional;
 
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
+
+import static org.smssecure.smssecure.TransportOption.Type;
 
 public class QuickResponseService extends MasterSecretIntentService {
 
@@ -59,7 +62,8 @@ public class QuickResponseService extends MasterSecretIntentService {
 
       if (!TextUtils.isEmpty(content)) {
         if (recipients.isSingleRecipient()) {
-          MessageSender.send(this, masterSecret, new OutgoingTextMessage(recipients, content, subscriptionId), -1, false);
+          //boolean isXmpp = ViewUtil.findById(getApplicationContext(), R.id.send_button).getSelectedTransport().getType() == Type.SECURE_XMPP;
+          MessageSender.send(this, masterSecret, new OutgoingTextMessage(recipients, content, subscriptionId), -1);
         } else {
           MessageSender.send(this, masterSecret, new OutgoingMediaMessage(recipients, new SlideDeck(), content, System.currentTimeMillis(),
                                                                           subscriptionId, ThreadDatabase.DistributionTypes.DEFAULT), -1, false);

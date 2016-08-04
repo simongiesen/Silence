@@ -94,6 +94,15 @@ public class SilencePreferences {
   private static final String MEDIA_DOWNLOAD_PREF              = "pref_media_download";
   private static final String MEDIA_DOWNLOAD_ROAMING_PREF      = "pref_media_download_roaming";
 
+  public  static final String XMPP_STATUS                      = "pref_xmpp_status";
+  public  static final String XMPP_ENABLED_PREF                = "pref_xmpp_enabled";
+  private static final String XMPP_USERNAME_PREF               = "pref_xmpp_username";
+  private static final String XMPP_PASSWORD_PREF               = "pref_xmpp_password";
+  private static final String XMPP_HOSTNAME_PREF               = "pref_xmpp_hostname";
+  private static final String XMPP_PORT_PREF                   = "pref_xmpp_port";
+  public  static final String XMPP_NOTIFY_CONTACTS             = "pref_xmpp_notify";
+  private static final String XMPP_FORCE                       = "pref_xmpp_force";
+
   public static NotificationPrivacyPreference getNotificationPrivacy(Context context) {
     return new NotificationPrivacyPreference(getStringPreference(context, NOTIFICATION_PRIVACY_PREF, "all"));
   }
@@ -527,6 +536,67 @@ public class SilencePreferences {
 
   public static boolean showSentTime(Context context) {
     return getBooleanPreference(context, SHOW_SENT_TIME, false);
+  }
+
+  public static boolean isXmppRegistered(Context context) {
+    return isXmppEnabled(context)         &&
+           getXmppUsername(context) != "" &&
+           getXmppPassword(context) != "" &&
+           getXmppHostname(context) != "" &&
+           getXmppPort(context)     != 0;
+  }
+
+  public static boolean isXmppEnabled(Context context) {
+    return getBooleanPreference(context, XMPP_ENABLED_PREF, false);
+  }
+
+  public static void enableXmpp(Context context) {
+    setBooleanPreference(context, XMPP_ENABLED_PREF, true);
+  }
+
+  public static void disableXmpp(Context context) {
+    setBooleanPreference(context, XMPP_ENABLED_PREF, false);
+  }
+
+  public static String getXmppJid(Context context) {
+    String xmppJid = getXmppUsername(context) + "@" + getXmppHostname(context);
+    return xmppJid.equals("@") ? "" : xmppJid;
+  }
+
+  public static String getXmppUsername(Context context) {
+    return getStringPreference(context, XMPP_USERNAME_PREF, "");
+  }
+
+  public static String getXmppPassword(Context context) {
+    return getStringPreference(context, XMPP_PASSWORD_PREF, "");
+  }
+
+  public static String getXmppHostname(Context context) {
+    return getStringPreference(context, XMPP_HOSTNAME_PREF, "");
+  }
+
+  public static int getXmppPort(Context context) {
+    return getIntegerPreference(context, XMPP_PORT_PREF, 0);
+  }
+
+  public static void setXmppUsername(Context context, String username) {
+    setStringPreference(context, XMPP_USERNAME_PREF, username);
+  }
+
+  public static void setXmppPassword(Context context, String password) {
+    setStringPreference(context, XMPP_PASSWORD_PREF, password);
+  }
+
+  public static void setXmppHostname(Context context, String hostname) {
+    setStringPreference(context, XMPP_HOSTNAME_PREF, hostname);
+  }
+
+  public static void setXmppPort(Context context, int port) {
+    setIntegerPrefrence(context, XMPP_PORT_PREF, port);
+  }
+
+  public static boolean isXmppForced(Context context) {
+    return getBooleanPreference(context, XMPP_FORCE, false);
   }
 
   public static void setBooleanPreference(Context context, String key, boolean value) {

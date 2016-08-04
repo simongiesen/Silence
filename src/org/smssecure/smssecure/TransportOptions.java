@@ -11,6 +11,8 @@ import org.smssecure.smssecure.util.SmsCharacterCalculator;
 import org.smssecure.smssecure.util.EncryptedSmsCharacterCalculator;
 import org.smssecure.smssecure.util.dualsim.SubscriptionInfoCompat;
 import org.smssecure.smssecure.util.dualsim.SubscriptionManagerCompat;
+import org.smssecure.smssecure.util.XmppUtil;
+import org.smssecure.smssecure.util.XmppCharacterCalculator;
 import org.whispersystems.libaxolotl.util.guava.Optional;
 
 import java.util.LinkedList;
@@ -144,6 +146,19 @@ public class TransportOptions {
                                                     context.getString(R.string.ConversationActivity_transport_secure_sms),
                                                     context.getString(R.string.conversation_activity__type_message_sms_secure),
                                                     new EncryptedSmsCharacterCalculator()));
+    }
+
+    if (XmppUtil.isXmppAvailable(context)){
+      results.addAll(getTransportOptionsForSimCards(Type.SECURE_XMPP, R.drawable.ic_send_secure_white_24dp,
+                                                    context.getResources().getColor(R.color.silence_xmpp),
+                                                    context.getString(R.string.ConversationActivity_transport_secure_xmpp),
+                                                    context.getString(R.string.conversation_activity__type_message_xmpp_secure),
+                                                    new XmppCharacterCalculator()));
+      results.addAll(getTransportOptionsForSimCards(Type.SECURE_XMPP_OFFLINE, R.drawable.ic_send_secure_white_24dp,
+                                                    context.getResources().getColor(R.color.silence_xmpp_offline),
+                                                    context.getString(R.string.ConversationActivity_transport_secure_xmpp),
+                                                    context.getString(R.string.conversation_activity__type_message_xmpp_secure),
+                                                    new XmppCharacterCalculator()));
     }
 
     return results;

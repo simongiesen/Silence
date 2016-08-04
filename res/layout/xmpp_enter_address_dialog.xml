@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                xmlns:android="http://schemas.android.com/apk/res/android" >
+
+  <TextView android:id="@+id/xmpp_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/xmpp_enter_address_dialog__use_this_form_to_enter_the_xmpp_address_of"
+            android:gravity="center_vertical"
+            android:padding="10dip" />
+
+  <EditText android:id="@+id/xmpp_address"
+            android:layout_height="wrap_content"
+            android:hint="@string/xmpp_enter_address_dialog__xmpp_address"
+            android:inputType="textEmailAddress"
+            android:layout_below="@+id/xmpp_text"
+            android:layout_width="fill_parent">
+  </EditText>
+
+</RelativeLayout>

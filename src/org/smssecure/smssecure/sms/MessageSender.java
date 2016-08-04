@@ -37,6 +37,7 @@ import org.smssecure.smssecure.util.GroupUtil;
 import org.smssecure.smssecure.util.InvalidNumberException;
 import org.smssecure.smssecure.util.SilencePreferences;
 import org.smssecure.smssecure.util.Util;
+import org.smssecure.smssecure.util.XmppUtil;
 import org.whispersystems.jobqueue.JobManager;
 import org.whispersystems.libaxolotl.util.guava.Optional;
 
@@ -51,12 +52,22 @@ public class MessageSender {
   public static long send(final Context context,
                           final MasterSecret masterSecret,
                           final OutgoingTextMessage message,
+                          final long threadId)
+  {
+    Recipient primaryRecipient = message.getRecipients() == null ? null : message.getRecipients().getPrimaryRecipient();
+    boolean  isXmppAvailable   = XmppUtil.isXmppAvailable(context) && primaryRecipient.getXmppJid() != null;
+
+    return send(context, masterSecret, message, threadId, isXmppAvailable);
+  }
+
+  public static long send(final Context context,
+                          final MasterSecret masterSecret,
+                          final OutgoingTextMessage message,
                           final long threadId,
-                          final boolean forceSms)
+                          final boolean isXmpp)
   {
     EncryptingSmsDatabase database    = DatabaseFactory.getEncryptingSmsDatabase(context);
     Recipients            recipients  = message.getRecipients();
-    boolean               keyExchange = message.isKeyExchange();
 
     long allocatedThreadId;
 
@@ -66,7 +77,8 @@ public class MessageSender {
       allocatedThreadId = threadId;
     }
 
-    long messageId = database.insertMessageOutbox(masterSecret, allocatedThreadId, message, forceSms, System.currentTimeMillis());
+    long messageId = database.insertMessageOutbox(masterSecret, allocatedThreadId, message, System.currentTimeMillis());
+    if (isXmpp && !message.isXmppExchange()) database.markAsXmpp(messageId);
 
     sendTextMessage(context, recipients, messageId);
 
@@ -77,7 +89,7 @@ public class MessageSender {
                           final MasterSecret masterSecret,
                           final OutgoingMediaMessage message,
                           final long threadId,
-                          final boolean forceSms)
+                          final boolean isXmpp)
   {
     try {
       ThreadDatabase threadDatabase = DatabaseFactory.getThreadDatabase(context);
@@ -92,7 +104,7 @@ public class MessageSender {
       }
 
       Recipients recipients = message.getRecipients();
-      long       messageId  = database.insertMessageOutbox(masterSecret, message, allocatedThreadId, forceSms);
+      long       messageId  = database.insertMessageOutbox(masterSecret, message, allocatedThreadId);
 
       sendMediaMessage(context, messageId);
 

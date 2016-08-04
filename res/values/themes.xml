@@ -139,6 +139,7 @@
         <item name="conversation_item_sent_text_indicator_tab_color">#99000000</item>
         <item name="conversation_item_received_text_primary_color">@color/white</item>
         <item name="conversation_item_received_text_secondary_color">#BFffffff</item>
+        <item name="conversation_item_xmpp">@drawable/ic_xmpp_white_18dp</item>
 
         <item name="conversation_item_sent_indicator_text_background">@drawable/conversation_item_sent_indicator_text_shape</item>
 
@@ -181,6 +182,7 @@
         <item name="pref_ic_app_protection">@drawable/ic_app_protection_black</item>
         <item name="pref_ic_appearance">@drawable/ic_brightness_6_black</item>
         <item name="pref_ic_chats">@drawable/ic_forum_black_32dp</item>
+        <item name="pref_ic_xmpp">@drawable/ic_xmpp_black</item>
         <item name="pref_ic_advanced">@drawable/ic_advanced_black</item>
 
         <item name="app_protect_timeout_picker_color">@style/BetterPickersDialogFragment.Light</item>
@@ -219,6 +221,7 @@
         <item name="conversation_item_received_text_primary_color">@color/white</item>
         <item name="conversation_item_received_text_secondary_color">#BFffffff</item>
         <item name="conversation_item_sent_indicator_text_background">@drawable/conversation_item_sent_indicator_text_shape_dark</item>
+        <item name="conversation_item_xmpp">@drawable/ic_xmpp_white_18dp</item>
 
         <item name="dialog_info_icon">@drawable/ic_info_outline_dark</item>
         <item name="dialog_alert_icon">@drawable/ic_warning_dark</item>
@@ -294,6 +297,7 @@
         <item name="pref_ic_app_protection">@drawable/ic_app_protection_gray</item>
         <item name="pref_ic_appearance">@drawable/ic_brightness_6_gray</item>
         <item name="pref_ic_chats">@drawable/ic_forum_grey_32dp</item>
+        <item name="pref_ic_xmpp">@drawable/ic_xmpp_grey</item>
         <item name="pref_ic_advanced">@drawable/ic_advanced_gray</item>
 
         <item name="app_protect_timeout_picker_color">@style/BetterPickersDialogFragment</item>

@@ -11,11 +11,7 @@ public class MmsSendResult {
     this.messageId      = messageId;
     this.responseStatus = responseStatus;
     this.upgradedSecure = upgradedSecure;
-    this.push           = push;
-  }
-
-  public boolean isPush() {
-    return push;
+    this.push           = false;
   }
 
   public boolean isUpgradedSecure() {

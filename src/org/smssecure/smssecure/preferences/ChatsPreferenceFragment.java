@@ -8,7 +8,6 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.support.v4.preference.PreferenceFragment;
 import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.smssecure.smssecure.ApplicationPreferencesActivity;

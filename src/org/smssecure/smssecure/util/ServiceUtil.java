@@ -2,6 +2,7 @@ package org.smssecure.smssecure.util;
 
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
@@ -27,5 +28,9 @@ public class ServiceUtil {
 
   public static TelephonyManager getTelephonyManager(Context context) {
     return (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+  }
+
+  public static ClipboardManager getClipboardManager(Context context) {
+    return (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
   }
 }

@@ -2,6 +2,7 @@ package org.smssecure.smssecure.components.reminder;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.view.View.OnClickListener;
 
@@ -13,9 +14,9 @@ public abstract class Reminder {
   private OnClickListener okListener;
   private OnClickListener dismissListener;
 
-  public Reminder(@NonNull CharSequence title,
-                  @NonNull CharSequence text,
-                  @NonNull CharSequence buttonText)
+  public Reminder(@NonNull  CharSequence title,
+                  @NonNull  CharSequence text,
+                  @Nullable CharSequence buttonText)
   {
     this.title      = title;
     this.text       = text;

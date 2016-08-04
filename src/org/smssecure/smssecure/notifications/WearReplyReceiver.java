@@ -74,7 +74,7 @@ public class WearReplyReceiver extends MasterSecretBroadcastReceiver {
             threadId = MessageSender.send(context, masterSecret, reply, -1, false);
           } else {
             OutgoingTextMessage reply = new OutgoingTextMessage(recipients, responseText.toString(), subscriptionId);
-            threadId = MessageSender.send(context, masterSecret, reply, -1, false);
+            threadId = MessageSender.send(context, masterSecret, reply, -1);
           }
 
           DatabaseFactory.getThreadDatabase(context).setRead(threadId);

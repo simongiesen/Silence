@@ -32,6 +32,7 @@ public class RecipientPreferenceDatabase extends Database {
   private static final String MUTE_UNTIL              = "mute_until";
   private static final String COLOR                   = "color";
   private static final String DEFAULT_SUBSCRIPTION_ID = "default_subscription_id";
+  public  static final String XMPP_JID                = "xmpp_jid";
 
   public enum VibrateState {
     DEFAULT(0), ENABLED(1), DISABLED(2);
@@ -60,7 +61,8 @@ public class RecipientPreferenceDatabase extends Database {
           VIBRATE + " INTEGER DEFAULT " + VibrateState.DEFAULT.getId() + ", " +
           MUTE_UNTIL + " INTEGER DEFAULT 0, " +
           COLOR + " TEXT DEFAULT NULL, " +
-          DEFAULT_SUBSCRIPTION_ID + " INTEGER DEFAULT -1);";
+          DEFAULT_SUBSCRIPTION_ID + " INTEGER DEFAULT -1, " +
+          XMPP_JID + " TEXT DEFAULT NULL);";
 
   public RecipientPreferenceDatabase(Context context, SQLiteOpenHelper databaseHelper) {
     super(context, databaseHelper);
@@ -95,6 +97,7 @@ public class RecipientPreferenceDatabase extends Database {
         String  serializedColor       = cursor.getString(cursor.getColumnIndexOrThrow(COLOR));
         Uri     notificationUri       = notification == null ? null : Uri.parse(notification);
         int     defaultSubscriptionId = cursor.getInt(cursor.getColumnIndexOrThrow(DEFAULT_SUBSCRIPTION_ID));
+        String  xmppJid               = cursor.getString(cursor.getColumnIndexOrThrow(XMPP_JID));
 
         MaterialColor color;
 
@@ -109,7 +112,8 @@ public class RecipientPreferenceDatabase extends Database {
 
         return Optional.of(new RecipientsPreferences(blocked, muteUntil,
                                                      VibrateState.fromId(vibrateState),
-                                                     notificationUri, color, defaultSubscriptionId));
+                                                     notificationUri, color, defaultSubscriptionId,
+                                                     xmppJid));
       }
 
       return Optional.absent();
@@ -121,6 +125,12 @@ public class RecipientPreferenceDatabase extends Database {
   public void setColor(Recipients recipients, MaterialColor color) {
     ContentValues values = new ContentValues();
     values.put(COLOR, color.serialize());
+    updateOrInsert(recipients, values);
+  }
+
+  public void setXmppJid(Recipients recipients, @Nullable String xmppJid) {
+    ContentValues values = new ContentValues();
+    values.put(XMPP_JID, xmppJid.equals("NULL") ? null : xmppJid);
     updateOrInsert(recipients, values);
   }
 
@@ -182,12 +192,14 @@ public class RecipientPreferenceDatabase extends Database {
     private final Uri           notification;
     private final MaterialColor color;
     private final int           defaultSubscriptionId;
+    private final String        xmppJid;
 
     public RecipientsPreferences(boolean blocked, long muteUntil,
                                  @NonNull VibrateState vibrateState,
                                  @Nullable Uri notification,
                                  @Nullable MaterialColor color,
-                                 int defaultSubscriptionId)
+                                 int defaultSubscriptionId,
+                                 @Nullable String xmppJid)
     {
       this.blocked               = blocked;
       this.muteUntil             = muteUntil;
@@ -195,10 +207,15 @@ public class RecipientPreferenceDatabase extends Database {
       this.notification          = notification;
       this.color                 = color;
       this.defaultSubscriptionId = defaultSubscriptionId;
+      this.xmppJid               = xmppJid;
     }
 
     public @Nullable MaterialColor getColor() {
       return color;
+    }
+
+    public @Nullable String getXmppJid() {
+      return xmppJid;
     }
 
     public boolean isBlocked() {

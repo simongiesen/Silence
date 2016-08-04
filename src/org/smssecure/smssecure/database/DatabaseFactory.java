@@ -73,9 +73,10 @@ public class DatabaseFactory {
   private static final int INTRODUCED_CONVERSATION_LIST_STATUS_VERSION     = 25;
   private static final int MIGRATED_CONVERSATION_LIST_STATUS_VERSION       = 26;
   private static final int INTRODUCED_SUBSCRIPTION_ID_VERSION              = 28;
-  private static final int DATABASE_VERSION                                = 28;
+  private static final int INTRODUCED_XMPP_TRANSPORT                       = 29;
+  public  static final int DATABASE_VERSION                                = 29;
 
-  private static final String DATABASE_NAME    = "messages.db";
+  public  static final String DATABASE_NAME    = "messages.db";
   private static final Object lock             = new Object();
 
   private static DatabaseFactory instance;
@@ -815,6 +816,11 @@ public class DatabaseFactory {
         db.execSQL("ALTER TABLE recipient_preferences ADD COLUMN default_subscription_id INTEGER DEFAULT -1");
         db.execSQL("ALTER TABLE sms ADD COLUMN subscription_id INTEGER DEFAULT -1");
         db.execSQL("ALTER TABLE mms ADD COLUMN subscription_id INTEGER DEFAULT -1");
+      }
+
+      if (oldVersion < INTRODUCED_XMPP_TRANSPORT) {
+        db.execSQL("ALTER TABLE recipient_preferences ADD COLUMN xmpp_jid TEXT DEFAULT NULL");
+        db.execSQL("ALTER TABLE sms ADD COLUMN xmpp_id TEXT DEFAULT NULL");
       }
 
       db.setTransactionSuccessful();

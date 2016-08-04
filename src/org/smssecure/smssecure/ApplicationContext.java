@@ -18,6 +18,7 @@ package org.smssecure.smssecure;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 
 import org.smssecure.smssecure.crypto.PRNGFixes;
 import org.smssecure.smssecure.dependencies.InjectableType;
@@ -26,6 +27,7 @@ import org.smssecure.smssecure.jobs.requirements.MasterSecretRequirementProvider
 import org.smssecure.smssecure.jobs.requirements.MediaNetworkRequirementProvider;
 import org.smssecure.smssecure.jobs.requirements.ServiceRequirementProvider;
 import org.smssecure.smssecure.util.SilencePreferences;
+import org.smssecure.smssecure.service.XmppService;
 import org.whispersystems.jobqueue.JobManager;
 import org.whispersystems.jobqueue.dependencies.DependencyInjector;
 import org.whispersystems.jobqueue.requirements.NetworkRequirementProvider;
@@ -60,6 +62,7 @@ public class ApplicationContext extends Application implements DependencyInjecto
     initializeRandomNumberFix();
     initializeLogging();
     initializeJobManager();
+    initializeXmppService();
   }
 
   @Override
@@ -92,6 +95,10 @@ public class ApplicationContext extends Application implements DependencyInjecto
                                                           mediaNetworkRequirementProvider)
                                 .withConsumerThreads(5)
                                 .build();
+  }
+
+  private void initializeXmppService() {
+    startService(new Intent(this, XmppService.class));
   }
 
   public void notifyMediaControlEvent() {

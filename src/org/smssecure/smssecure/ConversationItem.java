@@ -99,6 +99,7 @@ public class ConversationItem extends LinearLayout
   private TextView           indicatorText;
   private TextView           groupStatusText;
   private ImageView          secureImage;
+  private ImageView          xmppImage;
   private AvatarImageView    contactPhoto;
   private DeliveryStatusView deliveryStatusIndicator;
   private AlertView          alertView;
@@ -142,6 +143,7 @@ public class ConversationItem extends LinearLayout
     this.indicatorText           = (TextView)           findViewById(R.id.indicator_text);
     this.groupStatusText         = (TextView)           findViewById(R.id.group_message_status);
     this.secureImage             = (ImageView)          findViewById(R.id.secure_indicator);
+    this.xmppImage               = (ImageView)          findViewById(R.id.xmpp_indicator);
     this.deliveryStatusIndicator = (DeliveryStatusView) findViewById(R.id.delivery_status);
     this.alertView               = (AlertView)          findViewById(R.id.indicators_parent);
     this.mmsDownloadButton       = (Button)             findViewById(R.id.mms_download_button);
@@ -311,6 +313,7 @@ public class ConversationItem extends LinearLayout
     indicatorText.setVisibility(View.GONE);
 
     secureImage.setVisibility(messageRecord.isSecure() ? View.VISIBLE : View.GONE);
+    xmppImage.setVisibility(messageRecord.isXmpp() ? View.VISIBLE : View.GONE);
     bodyText.setCompoundDrawablesWithIntrinsicBounds(0, 0, messageRecord.isKeyExchange() ? R.drawable.ic_menu_login : 0, 0);
 
     dateText.setText(DateUtils.getExtendedRelativeTimeSpanString(getContext(), locale, messageRecord.getTimestamp()));
@@ -603,74 +606,8 @@ public class ConversationItem extends LinearLayout
                  !messageRecord.isStaleKeyExchange())
       {
         handleKeyExchangeClicked();
-      } else if (messageRecord.isPendingSmsFallback()) {
-        handleMessageApproval();
       }
     }
-  }
-
-  private void handleMessageApproval() {
-    final int title;
-    final int message;
-
-    if (messageRecord.isPendingSecureSmsFallback()) {
-      //TODO: Remove push code
-      title = -1;
-
-      message = -1;
-    } else {
-      if (messageRecord.isMms()) title = R.string.ConversationItem_click_to_approve_unencrypted_mms_dialog_title;
-      else                       title = R.string.ConversationItem_click_to_approve_unencrypted_sms_dialog_title;
-
-      message = R.string.ConversationItem_click_to_approve_unencrypted_dialog_message;
-    }
-
-    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-    builder.setTitle(title);
-
-    if (message > -1) builder.setMessage(message);
-
-    builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialogInterface, int i) {
-        if (messageRecord.isMms()) {
-          MmsDatabase database = DatabaseFactory.getMmsDatabase(context);
-          if (messageRecord.isPendingInsecureSmsFallback()) {
-            database.markAsInsecure(messageRecord.getId());
-          }
-          database.markAsOutbox(messageRecord.getId());
-          database.markAsForcedSms(messageRecord.getId());
-
-          ApplicationContext.getInstance(context)
-                            .getJobManager()
-                            .add(new MmsSendJob(context, messageRecord.getId()));
-        } else {
-          SmsDatabase database = DatabaseFactory.getSmsDatabase(context);
-          if (messageRecord.isPendingInsecureSmsFallback()) {
-            database.markAsInsecure(messageRecord.getId());
-          }
-          database.markAsOutbox(messageRecord.getId());
-          database.markAsForcedSms(messageRecord.getId());
-
-          ApplicationContext.getInstance(context)
-                            .getJobManager()
-                            .add(new SmsSendJob(context, messageRecord.getId(),
-                                                messageRecord.getIndividualRecipient().getNumber()));
-        }
-      }
-    });
-
-    builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialogInterface, int i) {
-        if (messageRecord.isMms()) {
-          DatabaseFactory.getMmsDatabase(context).markAsSentFailed(messageRecord.getId());
-        } else {
-          DatabaseFactory.getSmsDatabase(context).markAsSentFailed(messageRecord.getId());
-        }
-      }
-    });
-    builder.show();
   }
 
 }

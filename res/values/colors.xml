@@ -4,6 +4,8 @@
     <color name="silence_primary_dark">#ff1c7ac5</color>
     <color name="silence_primary_alpha33">#552090ea</color>
     <color name="silence_primary_alpha_focus">#882090ea</color>
+    <color name="silence_xmpp">#ff139f5b</color>
+    <color name="silence_xmpp_offline">#fff57f17</color>
 
     <color name="white">#ffffffff</color>
     <color name="black">#ff000000</color>

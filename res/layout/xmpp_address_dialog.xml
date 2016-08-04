@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                xmlns:android="http://schemas.android.com/apk/res/android" >
+
+  <TextView android:id="@+id/xmpp_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:fontFamily="monospace"
+            android:text="(null)"
+            android:paddingTop="10dip"
+            android:gravity="center"
+            android:clickable="true" />
+
+  <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/xmpp_address_dialog__send_the_link_above_to_your_contacts_to_start_using_xmpp_messages_with_them"
+            android:gravity="center_vertical"
+            android:layout_below="@+id/xmpp_address"
+            android:padding="10dip" />
+
+</RelativeLayout>

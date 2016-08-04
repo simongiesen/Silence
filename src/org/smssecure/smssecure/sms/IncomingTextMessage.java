@@ -32,7 +32,7 @@ public class IncomingTextMessage implements Parcelable {
   private final String  pseudoSubject;
   private final long    sentTimestampMillis;
   private final String  groupId;
-  private final boolean push;
+  private final boolean xmpp;
   private final int     subscriptionId;
 
   public IncomingTextMessage(SmsMessage message, int subscriptionId) {
@@ -46,7 +46,7 @@ public class IncomingTextMessage implements Parcelable {
     this.sentTimestampMillis  = message.getTimestampMillis();
     this.subscriptionId       = subscriptionId;
     this.groupId              = null;
-    this.push                 = false;
+    this.xmpp                 = false;
   }
 
   public IncomingTextMessage(String sender, int senderDeviceId, long sentTimestampMillis, String encodedBody) {
@@ -58,9 +58,9 @@ public class IncomingTextMessage implements Parcelable {
     this.replyPathPresent     = true;
     this.pseudoSubject        = "";
     this.sentTimestampMillis  = sentTimestampMillis;
-    this.push                 = true;
+    this.xmpp                 = true;
     this.subscriptionId       = -1;
-    this.groupId = null;
+    this.groupId              = null;
   }
 
   public IncomingTextMessage(Parcel in) {
@@ -73,7 +73,7 @@ public class IncomingTextMessage implements Parcelable {
     this.pseudoSubject        = in.readString();
     this.sentTimestampMillis  = in.readLong();
     this.groupId              = in.readString();
-    this.push                 = (in.readInt() == 1);
+    this.xmpp                 = (in.readInt() == 1);
     this.subscriptionId       = in.readInt();
   }
 
@@ -87,7 +87,7 @@ public class IncomingTextMessage implements Parcelable {
     this.pseudoSubject        = base.getPseudoSubject();
     this.sentTimestampMillis  = base.getSentTimestampMillis();
     this.groupId              = base.getGroupId();
-    this.push                 = base.isPush();
+    this.xmpp                 = base.isXmpp();
     this.subscriptionId       = base.getSubscriptionId();
   }
 
@@ -107,7 +107,7 @@ public class IncomingTextMessage implements Parcelable {
     this.pseudoSubject        = fragments.get(0).getPseudoSubject();
     this.sentTimestampMillis  = fragments.get(0).getSentTimestampMillis();
     this.groupId              = fragments.get(0).getGroupId();
-    this.push                 = fragments.get(0).isPush();
+    this.xmpp                 = fragments.get(0).isXmpp();
     this.subscriptionId       = fragments.get(0).getSubscriptionId();
   }
 
@@ -122,7 +122,7 @@ public class IncomingTextMessage implements Parcelable {
     this.pseudoSubject        = "";
     this.sentTimestampMillis  = System.currentTimeMillis();
     this.groupId              = groupId;
-    this.push                 = true;
+    this.xmpp                 = true;
     this.subscriptionId       = -1;
   }
 
@@ -186,8 +186,8 @@ public class IncomingTextMessage implements Parcelable {
     return false;
   }
 
-  public boolean isPush() {
-    return push;
+  public boolean isXmpp() {
+    return xmpp;
   }
 
   public String getGroupId() {
@@ -214,7 +214,7 @@ public class IncomingTextMessage implements Parcelable {
     out.writeString(pseudoSubject);
     out.writeLong(sentTimestampMillis);
     out.writeString(groupId);
-    out.writeInt(push ? 1 : 0);
+    out.writeInt(xmpp ? 1 : 0);
     out.writeInt(subscriptionId);
   }
 }

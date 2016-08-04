@@ -178,6 +178,19 @@ public class Recipients implements Iterable<Recipient>, RecipientModifiedListene
     else if (!isEmpty())                                 recipients.get(0).setColor(color);
   }
 
+  public synchronized @Nullable String getXmppJid() {
+    if (!isSingleRecipient() || isGroupRecipient() || isEmpty()){
+      return null;
+    } else {
+      return recipients.get(0).getXmppJid();
+    }
+  }
+
+  public synchronized void setXmppJid(@NonNull String xmppJid) {
+    if      (!isSingleRecipient() || isGroupRecipient()) throw new AssertionError("Groups don't have unique JID!");
+    else if (!isEmpty())                                 recipients.get(0).setXmppJid(xmppJid);
+  }
+
   public synchronized void addListener(RecipientsModifiedListener listener) {
     if (listeners.isEmpty()) {
       for (Recipient recipient : recipients) {

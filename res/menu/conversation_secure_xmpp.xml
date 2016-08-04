@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+      <item android:title="@string/conversation_secure_verified__menu_share_xmpp_address"
+            android:id="@+id/menu_display_xmpp_address"/>
+      <item android:title="@string/conversation_secure_verified__menu_share_xmpp_address_via_sms"
+            android:id="@+id/menu_start_xmpp_exchange"/>
+      <item android:title="@string/conversation_secure_verified__menu_enter_xmpp_address_manually"
+            android:id="@+id/menu_enter_xmpp_address_manually"/>
+</menu>

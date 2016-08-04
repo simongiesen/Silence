@@ -65,6 +65,7 @@
     <attr name="conversation_item_received_text_secondary_color" format="reference|color"/>
     <attr name="conversation_item_sent_text_indicator_tab_color" format="reference|color"/>
     <attr name="conversation_item_sent_indicator_text_background" format="reference" />
+    <attr name="conversation_item_xmpp" format="reference" />
 
     <attr name="dialog_info_icon" format="reference" />
     <attr name="dialog_alert_icon" format="reference" />
@@ -111,6 +112,7 @@
     <attr name="pref_ic_appearance" format="reference" />
     <attr name="pref_ic_storage" format="reference" />
     <attr name="pref_ic_chats" format="reference" />
+    <attr name="pref_ic_xmpp" format="reference" />
     <attr name="pref_ic_advanced" format="reference" />
 
     <attr name="app_protect_timeout_picker_color" format="reference"/>

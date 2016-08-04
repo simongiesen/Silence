@@ -49,9 +49,15 @@ public class OutgoingTextMessage {
     return false;
   }
 
+  public boolean isXmppExchange() {
+    return false;
+  }
+
   public static OutgoingTextMessage from(SmsMessageRecord record) {
     if (record.isSecure()) {
       return new OutgoingEncryptedMessage(record.getRecipients(), record.getBody().getBody(), record.getSubscriptionId());
+    } else if (record.isXmppExchange()) {
+      return new OutgoingXmppExchangeMessage(record.getRecipients(), record.getBody().getBody(), record.getSubscriptionId());
     } else if (record.isKeyExchange()) {
       return new OutgoingKeyExchangeMessage(record.getRecipients(), record.getBody().getBody(), record.getSubscriptionId());
     } else if (record.isEndSession()) {

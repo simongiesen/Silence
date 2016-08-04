@@ -111,6 +111,19 @@
                           android:orientation="horizontal"
                           android:gravity="left">
 
+                <ImageView android:id="@+id/xmpp_indicator"
+                           android:layout_width="wrap_content"
+                           android:layout_height="wrap_content"
+                           android:layout_gravity="center_vertical"
+                           android:paddingTop="2dp"
+                           android:paddingRight="4dp"
+                           android:paddingEnd="4dp"
+                           android:src="?conversation_item_xmpp"
+                           android:contentDescription="@string/conversation_item__xmpp_message_description"
+                           android:visibility="gone"
+                           android:tint="?conversation_item_received_text_secondary_color"
+                           android:tintMode="multiply"/>
+
                 <ImageView android:id="@+id/secure_indicator"
                            android:layout_width="wrap_content"
                            android:layout_height="wrap_content"

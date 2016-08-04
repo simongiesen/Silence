@@ -154,7 +154,7 @@ public class MultipartSmsTransportMessage {
     return message;
   }
 
-  public static ArrayList<String> getEncoded(OutgoingTextMessage message, byte identifier)
+  public static ArrayList<String> getEncoded(OutgoingTextMessage message, byte identifier, boolean isXmpp)
   {
     try {
       byte[] decoded = Base64.decodeWithoutPadding(message.getMessageBody());
@@ -165,10 +165,11 @@ public class MultipartSmsTransportMessage {
       if      (message.isKeyExchange())  prefix = new KeyExchangeWirePrefix();
       else if (message.isPreKeyBundle()) prefix = new PrekeyBundleWirePrefix();
       else if (message.isEndSession())   prefix = new EndSessionWirePrefix();
+      else if (message.isXmppExchange()) prefix = new XmppExchangeWirePrefix();
       else                               prefix = new SecureMessageWirePrefix();
 
-      if (count == 1) return getSingleEncoded(decoded, prefix);
-      else            return getMultiEncoded(decoded, prefix, count, identifier);
+      if (count == 1 || isXmpp) return getSingleEncoded(decoded, prefix);
+      else                      return getMultiEncoded(decoded, prefix, count, identifier);
 
     } catch (IOException e) {
       throw new AssertionError(e);

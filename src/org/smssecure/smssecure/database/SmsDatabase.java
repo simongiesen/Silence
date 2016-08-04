@@ -72,13 +72,14 @@ public class SmsDatabase extends MessagingDatabase {
   public  static final String REPLY_PATH_PRESENT = "reply_path_present";
   public  static final String SUBJECT            = "subject";
   public  static final String SERVICE_CENTER     = "service_center";
+  public  static final String XMPP_ID            = "xmpp_id";
 
   public static final String CREATE_TABLE = "CREATE TABLE " + TABLE_NAME + " (" + ID + " integer PRIMARY KEY, "                +
     THREAD_ID + " INTEGER, " + ADDRESS + " TEXT, " + ADDRESS_DEVICE_ID + " INTEGER DEFAULT 1, " + PERSON + " INTEGER, " +
     DATE_RECEIVED  + " INTEGER, " + DATE_SENT + " INTEGER, " + PROTOCOL + " INTEGER, " + READ + " INTEGER DEFAULT 0, " +
     STATUS + " INTEGER DEFAULT -1," + TYPE + " INTEGER, " + REPLY_PATH_PRESENT + " INTEGER, " +
     DATE_DELIVERY_RECEIVED + " INTEGER DEFAULT 0," + SUBJECT + " TEXT, " + BODY + " TEXT, " +
-    MISMATCHED_IDENTITIES + " TEXT DEFAULT NULL, " + SERVICE_CENTER + " TEXT, " + SUBSCRIPTION_ID + " INTEGER DEFAULT -1);";
+    MISMATCHED_IDENTITIES + " TEXT DEFAULT NULL, " + SERVICE_CENTER + " TEXT, " + SUBSCRIPTION_ID + " INTEGER DEFAULT -1, " + XMPP_ID + " TEXT DEFAULT NULL);";
 
   public static final String[] CREATE_INDEXS = {
     "CREATE INDEX IF NOT EXISTS sms_thread_id_index ON " + TABLE_NAME + " (" + THREAD_ID + ");",
@@ -125,6 +126,25 @@ public class SmsDatabase extends MessagingDatabase {
 
   public long getThreadIdForMessage(long id) {
     String sql        = "SELECT " + THREAD_ID + " FROM " + TABLE_NAME + " WHERE " + ID + " = ?";
+    String[] sqlArgs  = new String[] {id+""};
+    SQLiteDatabase db = databaseHelper.getReadableDatabase();
+
+    Cursor cursor = null;
+
+    try {
+      cursor = db.rawQuery(sql, sqlArgs);
+      if (cursor != null && cursor.moveToFirst())
+        return cursor.getLong(0);
+      else
+        return -1;
+    } finally {
+      if (cursor != null)
+        cursor.close();
+    }
+  }
+
+  public long getMessageIdFromXmpp(String id) {
+    String sql        = "SELECT " + ID + " FROM " + TABLE_NAME + " WHERE " + XMPP_ID + " = ?";
     String[] sqlArgs  = new String[] {id+""};
     SQLiteDatabase db = databaseHelper.getReadableDatabase();
 
@@ -207,12 +227,8 @@ public class SmsDatabase extends MessagingDatabase {
     updateTypeBitmask(id, Types.SECURE_MESSAGE_BIT, 0);
   }
 
-  public void markAsPush(long id) {
-    updateTypeBitmask(id, 0, Types.PUSH_MESSAGE_BIT);
-  }
-
-  public void markAsForcedSms(long id) {
-    updateTypeBitmask(id, Types.PUSH_MESSAGE_BIT, Types.MESSAGE_FORCE_SMS_BIT);
+  public void markAsXmpp(long id) {
+    updateTypeBitmask(id, 0, Types.XMPP_MESSAGE_BIT);
   }
 
   public void markAsXmppExchange(long id) {
@@ -279,6 +295,14 @@ public class SmsDatabase extends MessagingDatabase {
     long threadId = getThreadIdForMessage(id);
     DatabaseFactory.getThreadDatabase(context).update(threadId, false);
     notifyConversationListeners(threadId);
+  }
+
+  public void updateXmppId(long id, String xmppId) {
+    ContentValues contentValues = new ContentValues();
+    contentValues.put(XMPP_ID, xmppId);
+
+    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+    db.update(TABLE_NAME, contentValues, ID_WHERE, new String[] {id+""});
   }
 
   public void markAsSentFailed(long id) {
@@ -373,7 +397,7 @@ public class SmsDatabase extends MessagingDatabase {
 //      type |= Types.ENCRYPTION_REMOTE_BIT;
     }
 
-    if (message.isPush()) type |= Types.PUSH_MESSAGE_BIT;
+    if (message.isXmpp()) type |= Types.XMPP_MESSAGE_BIT;
 
     Recipients recipients;
 
@@ -437,12 +461,12 @@ public class SmsDatabase extends MessagingDatabase {
   }
 
   protected long insertMessageOutbox(long threadId, OutgoingTextMessage message,
-                                     long type, boolean forceSms, long date)
+                                     long type, long date)
   {
     if      (message.isKeyExchange())   type |= Types.KEY_EXCHANGE_BIT;
     else if (message.isSecureMessage()) type |= Types.SECURE_MESSAGE_BIT;
+    else if (message.isXmppExchange())  type |= Types.XMPP_EXCHANGE_BIT;
     else if (message.isEndSession())    type |= Types.END_SESSION_BIT;
-    if      (forceSms)                  type |= Types.MESSAGE_FORCE_SMS_BIT;
 
     ContentValues contentValues = new ContentValues(7);
     contentValues.put(ADDRESS, PhoneNumberUtils.formatNumber(message.getRecipients().getPrimaryRecipient().getNumber()));

@@ -16,6 +16,7 @@ import org.smssecure.smssecure.database.DatabaseFactory;
 import org.smssecure.smssecure.database.EncryptingSmsDatabase;
 import org.smssecure.smssecure.database.NoSuchMessageException;
 import org.smssecure.smssecure.database.SmsDatabase;
+import org.smssecure.smssecure.database.MmsSmsColumns;
 import org.smssecure.smssecure.database.model.SmsMessageRecord;
 import org.smssecure.smssecure.jobs.requirements.MasterSecretRequirement;
 import org.smssecure.smssecure.jobs.requirements.NetworkOrServiceRequirement;
@@ -23,6 +24,7 @@ import org.smssecure.smssecure.jobs.requirements.ServiceRequirement;
 import org.smssecure.smssecure.notifications.MessageNotifier;
 import org.smssecure.smssecure.recipients.Recipients;
 import org.smssecure.smssecure.service.SmsDeliveryListener;
+import org.smssecure.smssecure.service.XmppService;
 import org.smssecure.smssecure.sms.MultipartSmsMessageHandler;
 import org.smssecure.smssecure.sms.OutgoingTextMessage;
 import org.smssecure.smssecure.transport.InsecureFallbackApprovalException;
@@ -32,6 +34,7 @@ import org.smssecure.smssecure.util.SilencePreferences;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.libaxolotl.NoSessionException;
 
+import java.lang.StringBuilder;
 import java.util.ArrayList;
 
 public class SmsSendJob extends SendJob {
@@ -91,7 +94,7 @@ public class SmsSendJob extends SendJob {
   private void deliver(MasterSecret masterSecret, SmsMessageRecord message)
       throws UndeliverableMessageException, InsecureFallbackApprovalException
   {
-    if (message.isSecure() || message.isKeyExchange() || message.isEndSession()) {
+    if (message.isSecure() || message.isKeyExchange() || message.isEndSession() || message.isXmppExchange() || message.isXmpp()) {
       deliverSecureMessage(masterSecret, message);
     } else {
       deliverPlaintextMessage(message);
@@ -101,38 +104,55 @@ public class SmsSendJob extends SendJob {
   private void deliverSecureMessage(MasterSecret masterSecret, SmsMessageRecord message)
       throws UndeliverableMessageException, InsecureFallbackApprovalException
   {
-    MultipartSmsMessageHandler multipartMessageHandler = new MultipartSmsMessageHandler();
-    OutgoingTextMessage        transportMessage        = OutgoingTextMessage.from(message);
-
-    if (message.isSecure() || message.isEndSession()) {
+    OutgoingTextMessage transportMessage = OutgoingTextMessage.from(message);
+    if (message.isSecure() || message.isEndSession() || message.isXmppExchange()) {
       transportMessage = getAsymmetricEncrypt(masterSecret, transportMessage);
     }
 
-    ArrayList<String> messages                = multipartMessageHandler.divideMessage(transportMessage);
-    ArrayList<PendingIntent> sentIntents      = constructSentIntents(message.getId(), message.getType(), messages, message.isSecure());
-    ArrayList<PendingIntent> deliveredIntents = constructDeliveredIntents(message.getId(), message.getType(), messages);
+    MultipartSmsMessageHandler multipartMessageHandler = new MultipartSmsMessageHandler();
+    ArrayList<String>          messages                = multipartMessageHandler.divideMessage(transportMessage, message.isXmpp());
 
-    Log.w("SmsTransport", "Secure divide into message parts: " + messages.size());
+    if (!message.isXmpp()) {
+      ArrayList<PendingIntent> sentIntents      = constructSentIntents(message.getId(), message.getType(), messages, message.isSecure());
+      ArrayList<PendingIntent> deliveredIntents = constructDeliveredIntents(message.getId(), message.getType(), messages);
 
-    for (int i=0;i<messages.size();i++) {
-      // NOTE 11/04/14 -- There's apparently a bug where for some unknown recipients
-      // and messages, this will throw an NPE.  We have no idea why, so we're just
-      // catching it and marking the message as a failure.  That way at least it
-      // doesn't repeatedly crash every time you start the app.
-      try {
-        SmsManager.getDefault().sendTextMessage(message.getIndividualRecipient().getNumber(), null, messages.get(i),
-                                                sentIntents.get(i),
-                                                deliveredIntents == null ? null : deliveredIntents.get(i));
-      } catch (NullPointerException npe) {
-        Log.w(TAG, npe);
-        Log.w(TAG, "Recipient: " + message.getIndividualRecipient().getNumber());
-        Log.w(TAG, "Message Total Parts/Current: " + messages.size() + "/" + i);
-        Log.w(TAG, "Message Part Length: " + messages.get(i).getBytes().length);
-        throw new UndeliverableMessageException(npe);
-      } catch (IllegalArgumentException iae) {
-        Log.w(TAG, iae);
-        throw new UndeliverableMessageException(iae);
+      Log.w("SmsTransport", "Secure divide into message parts: " + messages.size());
+
+      for (int i=0;i<messages.size();i++) {
+        // NOTE 11/04/14 -- There's apparently a bug where for some unknown recipients
+        // and messages, this will throw an NPE.  We have no idea why, so we're just
+        // catching it and marking the message as a failure.  That way at least it
+        // doesn't repeatedly crash every time you start the app.
+        try {
+          SmsManager.getDefault().sendTextMessage(message.getIndividualRecipient().getNumber(), null, messages.get(i),
+                                                  sentIntents.get(i),
+                                                  deliveredIntents == null ? null : deliveredIntents.get(i));
+        } catch (NullPointerException npe) {
+          Log.w(TAG, npe);
+          Log.w(TAG, "Recipient: " + message.getIndividualRecipient().getNumber());
+          Log.w(TAG, "Message Total Parts/Current: " + messages.size() + "/" + i);
+          Log.w(TAG, "Message Part Length: " + messages.get(i).getBytes().length);
+          throw new UndeliverableMessageException(npe);
+        } catch (IllegalArgumentException iae) {
+          Log.w(TAG, iae);
+          throw new UndeliverableMessageException(iae);
+        }
       }
+    } else {
+      Log.w("XmppTransport", "Sending XMPP message...");
+
+      StringBuilder stringBuilder = new StringBuilder();
+      for (String string : messages) {
+        stringBuilder.append(string.trim());
+      }
+
+      String deliveryReceiptId = XmppService.getInstance().send(stringBuilder.toString(), message.getIndividualRecipient());
+      Log.w(TAG, "deliveryReceiptId: " + deliveryReceiptId);
+
+      EncryptingSmsDatabase database = DatabaseFactory.getEncryptingSmsDatabase(context);
+      long messageId = message.getId();
+      database.updateXmppId(messageId, deliveryReceiptId);
+      database.markAsSent(messageId);
     }
   }
 

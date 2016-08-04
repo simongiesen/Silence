@@ -16,7 +16,10 @@ import org.smssecure.smssecure.database.NoSuchMessageException;
 import org.smssecure.smssecure.database.model.SmsMessageRecord;
 import org.smssecure.smssecure.jobs.requirements.MasterSecretRequirement;
 import org.smssecure.smssecure.notifications.MessageNotifier;
+import org.smssecure.smssecure.recipients.RecipientFactory;
+import org.smssecure.smssecure.recipients.Recipients;
 import org.smssecure.smssecure.service.KeyCachingService;
+import org.smssecure.smssecure.service.XmppService;
 import org.smssecure.smssecure.sms.IncomingEncryptedMessage;
 import org.smssecure.smssecure.sms.IncomingEndSessionMessage;
 import org.smssecure.smssecure.sms.IncomingKeyExchangeMessage;
@@ -25,6 +28,8 @@ import org.smssecure.smssecure.sms.IncomingTextMessage;
 import org.smssecure.smssecure.sms.IncomingXmppExchangeMessage;
 import org.smssecure.smssecure.sms.MessageSender;
 import org.smssecure.smssecure.sms.OutgoingKeyExchangeMessage;
+import org.smssecure.smssecure.sms.OutgoingTextMessage;
+import org.smssecure.smssecure.sms.OutgoingXmppExchangeMessage;
 import org.smssecure.smssecure.util.SilencePreferences;
 import org.whispersystems.jobqueue.JobParameters;
 import org.whispersystems.libaxolotl.DuplicateMessageException;
@@ -149,6 +154,8 @@ public class SmsDecryptJob extends MasterSecretJob {
 
     if (SilencePreferences.isAutoRespondKeyExchangeEnabled(context) || manualOverride) {
       try {
+        final int subscriptionId = -1; // Is there a way to get the selected SIM in conversation?
+
         SmsCipher                  cipher   = new SmsCipher(new SilenceAxolotlStore(context, masterSecret));
         OutgoingKeyExchangeMessage response = cipher.process(context, message);
 
@@ -157,7 +164,18 @@ public class SmsDecryptJob extends MasterSecretJob {
         SecurityEvent.broadcastSecurityUpdateEvent(context, threadId);
 
         if (response != null) {
-          MessageSender.send(context, masterSecret, response, threadId, true);
+          MessageSender.send(context, masterSecret, response, threadId, false);
+        }
+
+        if (SilencePreferences.isXmppRegistered(context)) {
+          Recipients recipients = RecipientFactory.getRecipientsFromString(context, message.getSender(), false);
+
+          OutgoingXmppExchangeMessage xmppExchangeMessage =
+              new OutgoingXmppExchangeMessage(new OutgoingTextMessage(recipients,
+                                                                      SilencePreferences.getXmppUsername(context) + "@" + SilencePreferences.getXmppHostname(context),
+                                                                      subscriptionId));
+
+          MessageSender.send(context, masterSecret, xmppExchangeMessage, -1, false);
         }
       } catch (InvalidVersionException e) {
         Log.w(TAG, e);
@@ -182,7 +200,15 @@ public class SmsDecryptJob extends MasterSecretJob {
      throws NoSessionException, DuplicateMessageException, InvalidMessageException, LegacyMessageException
   {
     EncryptingSmsDatabase database = DatabaseFactory.getEncryptingSmsDatabase(context);
+
+    SmsCipher           cipher  = new SmsCipher(new SilenceAxolotlStore(context, masterSecret));
+    IncomingTextMessage xmppJid = cipher.decrypt(context, message);
+
     database.markAsXmppExchange(messageId);
+
+    XmppService.getInstance().subscribe(xmppJid.getMessageBody());
+
+    SecurityEvent.broadcastSecurityUpdateEvent(context, threadId);
   }
 
   private String getAsymmetricDecryptedBody(MasterSecret masterSecret, String body)

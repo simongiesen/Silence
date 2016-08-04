@@ -17,9 +17,11 @@
 package org.smssecure.smssecure;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -58,11 +60,14 @@ import org.smssecure.smssecure.components.reminder.Reminder;
 import org.smssecure.smssecure.components.reminder.ReminderView;
 import org.smssecure.smssecure.components.reminder.StoreRatingReminder;
 import org.smssecure.smssecure.components.reminder.SystemSmsImportReminder;
+import org.smssecure.smssecure.components.reminder.XmppConnectivityConnectingReminder;
+import org.smssecure.smssecure.components.reminder.XmppConnectivityDisconnectedReminder;
+import org.smssecure.smssecure.crypto.MasterSecret;
 import org.smssecure.smssecure.database.DatabaseFactory;
 import org.smssecure.smssecure.database.loaders.ConversationListLoader;
 import org.smssecure.smssecure.notifications.MessageNotifier;
 import org.smssecure.smssecure.recipients.Recipients;
-import org.smssecure.smssecure.crypto.MasterSecret;
+import org.smssecure.smssecure.service.XmppService;
 import org.smssecure.smssecure.util.Util;
 import org.smssecure.smssecure.util.ViewUtil;
 import org.smssecure.smssecure.util.task.SnackbarAsyncTask;
@@ -87,6 +92,8 @@ public class ConversationListFragment extends Fragment
   private Locale               locale;
   private String               queryFilter  = "";
   private boolean              archive;
+
+  private BroadcastReceiver    xmppUpdateReceiver;
 
   @Override
   public void onCreate(Bundle icicle) {
@@ -133,6 +140,7 @@ public class ConversationListFragment extends Fragment
     super.onResume();
 
     initializeReminders();
+    initializeReceiver();
     list.getAdapter().notifyDataSetChanged();
   }
 
@@ -159,9 +167,13 @@ public class ConversationListFragment extends Fragment
          if (DefaultSmsReminder.isEligible(context)) {
           return Optional.of(new DefaultSmsReminder(context));
         } else if (Util.isDefaultSmsProvider(context) && SystemSmsImportReminder.isEligible(context)) {
-          return Optional.of((new SystemSmsImportReminder(context, masterSecret)));
+          return Optional.of(new SystemSmsImportReminder(context, masterSecret));
         } else if (StoreRatingReminder.isEligible(context)) {
-          return Optional.of((new StoreRatingReminder(context)));
+          return Optional.of(new StoreRatingReminder(context));
+        } else if (XmppConnectivityConnectingReminder.isEligible(context)) {
+          return Optional.of(new XmppConnectivityConnectingReminder(context));
+        } else if (XmppConnectivityDisconnectedReminder.isEligible(context)) {
+          return Optional.of(new XmppConnectivityDisconnectedReminder(context));
         } else {
           return Optional.absent();
         }
@@ -173,6 +185,17 @@ public class ConversationListFragment extends Fragment
         }
       }
     }.execute(getActivity());
+  }
+
+  private void initializeReceiver() {
+    xmppUpdateReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        initializeReminders();
+      }
+    };
+
+    getActivity().registerReceiver(xmppUpdateReceiver, new IntentFilter(XmppService.XMPP_CONNECTIVITY_EVENT));
   }
 
   private void initializeListAdapter() {
@@ -393,6 +416,12 @@ public class ConversationListFragment extends Fragment
     }
 
     actionMode = null;
+  }
+
+  @Override
+  public void onPause() {
+    super.onPause();
+    if (xmppUpdateReceiver != null) getActivity().unregisterReceiver(xmppUpdateReceiver);
   }
 
   private class ArchiveListenerCallback extends ItemTouchHelper.SimpleCallback {

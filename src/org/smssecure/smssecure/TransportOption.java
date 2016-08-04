@@ -13,7 +13,9 @@ public class TransportOption {
 
   public enum Type {
     INSECURE_SMS,
-    SECURE_SMS
+    SECURE_SMS,
+    SECURE_XMPP,
+    SECURE_XMPP_OFFLINE
   }
 
   private final int                             drawable;

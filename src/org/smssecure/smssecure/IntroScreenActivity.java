@@ -45,15 +45,27 @@ public class IntroScreenActivity extends BaseActionBarActivity {
         add(new IntroPage(0xFF7568AE,
                           BasicIntroFragment.newInstance(R.drawable.splash_logo,
                                                          R.string.IntroScreenActivity_welcome_to_silence,
-                                                         R.string.IntroScreenActivity_silence_description)));
+                                                         R.string.IntroScreenActivity_silence_description,
+                                                         -1,
+                                                         null)));
         add(new IntroPage(0xFF7568AE,
                           BasicIntroFragment.newInstance(R.drawable.splash_padlock,
                                                          R.string.IntroScreenActivity_encrypt_your_messages,
-                                                         R.string.IntroScreenActivity_encrypt_your_messages_description)));
+                                                         R.string.IntroScreenActivity_encrypt_your_messages_description,
+                                                         -1,
+                                                         null)));
         add(new IntroPage(0xFF7568AE,
-                         BasicIntroFragment.newInstance(R.drawable.splash_open_padlock,
-                                                        R.string.IntroScreenActivity_talk_to_everyone,
-                                                        R.string.IntroScreenActivity_talk_to_everyone_description)));
+                          BasicIntroFragment.newInstance(R.drawable.splash_open_padlock,
+                                                         R.string.IntroScreenActivity_talk_to_everyone,
+                                                         R.string.IntroScreenActivity_talk_to_everyone_description,
+                                                         -1,
+                                                         null)));
+        add(new IntroPage(0xFF7568AE,
+                          BasicIntroFragment.newInstance(R.drawable.splash_xmpp,
+                                                         R.string.IntroScreenActivity_protect_your_metadata,
+                                                         R.string.IntroScreenActivity_protect_your_metadata_description,
+                                                         R.string.IntroScreenActivity_protect_your_metadata_link,
+                                                         "org.smssecure.smssecure.XmppRegisterActivity")));
       }
     });
 
@@ -98,7 +110,7 @@ public class IntroScreenActivity extends BaseActionBarActivity {
     if (numberOfPages > 1) {
       try {
         // For some reason this seems to throw an NPE on Android 2.3 - work around it for now
-        // See https://github.com/Silence/Silence/issues/311
+        // See https://github.com/SilenceIM/Silence/issues/311
         indicator.setViewPager(pager);
         indicator.setOnPageChangeListener(new OnPageChangeListener(introScreen.get()));
       }

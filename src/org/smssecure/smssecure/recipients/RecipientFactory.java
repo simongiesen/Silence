@@ -17,11 +17,18 @@
 package org.smssecure.smssecure.recipients;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import org.smssecure.smssecure.contacts.avatars.ContactPhotoFactory;
+import org.smssecure.smssecure.crypto.MasterSecret;
+import org.smssecure.smssecure.crypto.SessionUtil;
 import org.smssecure.smssecure.database.CanonicalAddressDatabase;
+import org.smssecure.smssecure.database.DatabaseFactory;
+import org.smssecure.smssecure.database.RecipientPreferenceDatabase;
 import org.smssecure.smssecure.util.Util;
 import org.whispersystems.libaxolotl.util.guava.Optional;
 
@@ -31,7 +38,9 @@ import java.util.StringTokenizer;
 
 public class RecipientFactory {
 
-  private static final RecipientProvider provider = new RecipientProvider();
+  private static final RecipientProvider provider  = new RecipientProvider();
+  private static final String TABLE                = "recipient_preferences";
+  private static final String RECIPIENT_IDS_COLUMN = "recipient_ids";
 
   public static Recipients getRecipientsForIds(Context context, String recipientIds, boolean asynchronous) {
     if (TextUtils.isEmpty(recipientIds))
@@ -95,6 +104,20 @@ public class RecipientFactory {
     return getRecipientsForIds(context, ids, asynchronous);
   }
 
+  public static @NonNull Recipients getRecipientsFromXmpp(@NonNull Context context, @NonNull List<String> xmppAddresses, boolean asynchronous) {
+    List<String> ids = new LinkedList<>();
+
+    for (String xmppAddress : xmppAddresses) {
+      Optional<Long> id = getRecipientIdFromXmpp(context, xmppAddress);
+
+      if (id.isPresent()) {
+        ids.add(String.valueOf(id.get()));
+      }
+    }
+
+    return getRecipientsForIds(context, ids, asynchronous);
+  }
+
   private static @NonNull Recipients getRecipientsForIds(Context context, List<String> idStrings, boolean asynchronous) {
     long[]       ids      = new long[idStrings.size()];
     int          i        = 0;
@@ -118,6 +141,78 @@ public class RecipientFactory {
     return Optional.of(CanonicalAddressDatabase.getInstance(context).getCanonicalAddressId(number));
   }
 
+  public static @NonNull Recipients getXmppRecipients(@NonNull Context context, boolean asynchronous) {
+    return getRecipientsForIds(context, getXmppRecipientsIds(context), asynchronous);
+  }
+
+  private static List<String> getXmppRecipientsIds(Context context) {
+    Cursor cursor = null;
+    try {
+      DatabaseHelper databaseHelper = DatabaseHelper.getInstance(context);
+      SQLiteDatabase db             = databaseHelper.getReadableDatabase();
+      String[]       columns        = new String[]{RECIPIENT_IDS_COLUMN};
+      String[]       whereArgs      = new String[]{"NULL"};
+      String         where          = RecipientPreferenceDatabase.XMPP_JID + "!=?";
+
+      cursor = db.query(TABLE, columns, where, whereArgs, null, null, null);
+
+      List<String> recipients = new LinkedList<>();
+
+      while (cursor != null && cursor.moveToNext()) {
+        recipients.add(String.valueOf(cursor.getLong(cursor.getColumnIndexOrThrow(RECIPIENT_IDS_COLUMN))));
+      }
+
+      return recipients;
+    } finally {
+      if (cursor != null) {
+        cursor.close();
+      }
+    }
+  }
+
+  private static Optional<Long> getRecipientIdFromXmpp(Context context, String xmppAddress) {
+    xmppAddress = xmppAddress.trim();
+
+    if (xmppAddress.isEmpty()) return Optional.absent();
+
+    Cursor cursor = null;
+
+    try {
+      DatabaseHelper databaseHelper = DatabaseHelper.getInstance(context);
+      SQLiteDatabase db             = databaseHelper.getReadableDatabase();
+      String[]       columns        = new String[]{RECIPIENT_IDS_COLUMN};
+      String[]       whereArgs      = new String[]{xmppAddress};
+      String         where          = RecipientPreferenceDatabase.XMPP_JID + "=?";
+
+      cursor = db.query(TABLE, columns, where, whereArgs, null, null, null, "1");
+
+      if (cursor != null && cursor.moveToFirst()) {
+        return Optional.of(cursor.getLong(cursor.getColumnIndexOrThrow(RECIPIENT_IDS_COLUMN)));
+      }
+
+      return Optional.absent();
+    } finally {
+      if (cursor != null) {
+        cursor.close();
+      }
+    }
+  }
+
+  public static @NonNull Recipients getSecureRecipients(@NonNull Context context, @NonNull MasterSecret masterSecret, boolean asynchronous) {
+    List<String> addresses = CanonicalAddressDatabase.getInstance(context).getCanonicalNumbers();
+    List<Long>   secureAddresses = new LinkedList<>();
+
+    for (String address : addresses) {
+      Optional<Long> addressId = getRecipientIdFromNumber(context, address);
+      if (SessionUtil.hasSession(context, masterSecret, address) && addressId.isPresent()) secureAddresses.add(addressId.get());
+    }
+
+    long[] secureAddressesArray = new long[secureAddresses.size()];
+    for (int i = 0; i < secureAddresses.size(); i++) secureAddressesArray[i] = secureAddresses.get(i);
+
+    return getRecipientsForIds(context, secureAddressesArray, asynchronous);
+  }
+
   private static boolean hasBracketedNumber(String recipient) {
     int openBracketIndex = recipient.indexOf('<');
 
@@ -135,6 +230,31 @@ public class RecipientFactory {
 
   public static void clearCache() {
     provider.clearCache();
+  }
+
+  private static class DatabaseHelper extends SQLiteOpenHelper {
+
+    private static DatabaseHelper instance;
+
+    public static DatabaseHelper getInstance(Context context) {
+      if (instance == null) {
+        instance = new DatabaseHelper(context, DatabaseFactory.DATABASE_NAME, null, DatabaseFactory.DATABASE_VERSION);
+      }
+      return instance;
+    }
+
+    public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+      super(context, name, factory, version);
+    }
+
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    }
+
   }
 
 }

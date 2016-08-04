@@ -107,17 +107,9 @@ public abstract class MessageRecord extends DisplayRecord {
     return id;
   }
 
-  public boolean isPush() {
-    return SmsDatabase.Types.isPushType(type) && !SmsDatabase.Types.isForcedSms(type);
-  }
-
   public long getTimestamp() {
     if (SilencePreferences.showSentTime(context)) return getDateSent();
     else                                            return getDateReceived();
-  }
-
-  public boolean isForcedSms() {
-    return SmsDatabase.Types.isForcedSms(type);
   }
 
   public boolean isStaleKeyExchange() {
@@ -158,6 +150,10 @@ public abstract class MessageRecord extends DisplayRecord {
 
   public boolean isXmppExchange() {
     return SmsDatabase.Types.isXmppExchangeType(type);
+  }
+
+  public boolean isXmpp() {
+    return SmsDatabase.Types.isXmppType(type);
   }
 
   public Recipient getIndividualRecipient() {

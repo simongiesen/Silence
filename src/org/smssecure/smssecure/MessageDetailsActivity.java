@@ -175,6 +175,8 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
       transportText = getString(R.string.ConversationFragment_pending);
     } else if (messageRecord.isMms()) {
       transportText = getString(R.string.ConversationFragment_mms);
+    } else if (messageRecord.isXmpp()) {
+      transportText = getString(R.string.ConversationFragment_xmpp);
     } else {
       transportText = getString(R.string.ConversationFragment_sms);
     }
@@ -216,7 +218,7 @@ public class MessageDetailsActivity extends PassphraseRequiredActionBarActivity 
 
   private void updateRecipients(MessageRecord messageRecord, Recipients recipients) {
     final int toFromRes;
-    if (messageRecord.isMms() && !messageRecord.isPush() && !messageRecord.isOutgoing()) {
+    if (messageRecord.isMms() && !messageRecord.isOutgoing()) {
       toFromRes = R.string.message_details_header__with;
     } else if (messageRecord.isOutgoing()) {
       toFromRes = R.string.message_details_header__to;

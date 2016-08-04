@@ -67,7 +67,7 @@ public class RecipientProvider {
   private static final Map<String, RecipientDetails> STATIC_DETAILS = new HashMap<String, RecipientDetails>() {{
     put("262966", new RecipientDetails("Amazon", "262966", null,
                                        ContactPhotoFactory.getDefaultGroupPhoto(),
-                                       ContactColors.UNKNOWN_COLOR));
+                                       ContactColors.UNKNOWN_COLOR, null));
   }};
 
   Recipient getRecipient(Context context, long recipientId, boolean asynchronous) {
@@ -132,6 +132,7 @@ public class RecipientProvider {
   private @NonNull RecipientDetails getIndividualRecipientDetails(Context context, long recipientId, @NonNull String number) {
     Optional<RecipientsPreferences> preferences = DatabaseFactory.getRecipientPreferenceDatabase(context).getRecipientsPreferences(new long[]{recipientId});
     MaterialColor                   color       = preferences.isPresent() ? preferences.get().getColor() : null;
+    String                          xmppJid     = preferences.isPresent() ? preferences.get().getXmppJid() : null;
     Uri                             uri         = Uri.withAppendedPath(PhoneLookup.CONTENT_FILTER_URI, Uri.encode(number));
     Cursor                          cursor      = context.getContentResolver().query(uri, CALLER_ID_PROJECTION,
                                                                                      null, null, null);
@@ -146,7 +147,7 @@ public class RecipientProvider {
                                                                           Uri.withAppendedPath(Contacts.CONTENT_URI, cursor.getLong(2) + ""),
                                                                           name);
 
-          return new RecipientDetails(cursor.getString(0), resultNumber, contactUri, contactPhoto, color);
+          return new RecipientDetails(cursor.getString(0), resultNumber, contactUri, contactPhoto, color, xmppJid);
         } else {
           Log.w(TAG, "resultNumber is null");
         }
@@ -157,7 +158,7 @@ public class RecipientProvider {
     }
 
     if (STATIC_DETAILS.containsKey(number)) return STATIC_DETAILS.get(number);
-    else                                    return new RecipientDetails(null, number, null, ContactPhotoFactory.getDefaultContactPhoto(null), color);
+    else                                    return new RecipientDetails(null, number, null, ContactPhotoFactory.getDefaultContactPhoto(null), color, xmppJid);
   }
 
   private @NonNull RecipientDetails getGroupRecipientDetails(Context context, String groupId) {
@@ -167,13 +168,13 @@ public class RecipientProvider {
 
       if (record != null) {
         ContactPhoto contactPhoto = ContactPhotoFactory.getGroupContactPhoto(record.getAvatar());
-        return new RecipientDetails(record.getTitle(), groupId, null, contactPhoto, null);
+        return new RecipientDetails(record.getTitle(), groupId, null, contactPhoto, null, null);
       }
 
-      return new RecipientDetails(null, groupId, null, ContactPhotoFactory.getDefaultGroupPhoto(), null);
+      return new RecipientDetails(null, groupId, null, ContactPhotoFactory.getDefaultGroupPhoto(), null, null);
     } catch (IOException e) {
       Log.w("RecipientProvider", e);
-      return new RecipientDetails(null, groupId, null, ContactPhotoFactory.getDefaultGroupPhoto(), null);
+      return new RecipientDetails(null, groupId, null, ContactPhotoFactory.getDefaultGroupPhoto(), null, null);
     }
   }
 
@@ -202,16 +203,18 @@ public class RecipientProvider {
     @NonNull  public final ContactPhoto  avatar;
     @Nullable public final Uri           contactUri;
     @Nullable public final MaterialColor color;
+    @Nullable public final String        xmppJid;
 
     public RecipientDetails(@Nullable String name, @NonNull String number,
                             @Nullable Uri contactUri, @NonNull ContactPhoto avatar,
-                            @Nullable MaterialColor color)
+                            @Nullable MaterialColor color, @Nullable String xmppJid)
     {
       this.name       = name;
       this.number     = number;
       this.avatar     = avatar;
       this.contactUri = contactUri;
       this.color      = color;
+      this.xmppJid    = xmppJid;
     }
   }
 
